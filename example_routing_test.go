@@ -4,7 +4,15 @@ import (
 	"fmt"
 )
 
-var routes = BuildFromMap(map[string]interface{}{
+func spSliceToStr(a []*string) []string {
+	b := make([]string, len(a))
+	for i := range a {
+		b[i] = *a[i]
+	}
+	return b
+}
+
+var routes = BuildFromMap(map[string]string{
 	"":                "root", // as universal prefix
 	"/api/user":       "user",
 	"/api/user/list":  "usersList",
@@ -25,9 +33,9 @@ func Example_routing() {
 		exact, ok := routes.GetByString(inp)
 		route := routes.GetAllByString(inp)
 		if ok {
-			fmt.Printf("%-17s:\thandler %-10s\t(route %v)\n", inp, exact, route)
+			fmt.Printf("%-17s:\thandler %-10s\t(route %v)\n", inp, *exact, spSliceToStr(route))
 		} else {
-			fmt.Printf("%-17s:\thandler not found\t(route %v)\n", inp, route)
+			fmt.Printf("%-17s:\thandler not found\t(route %v)\n", inp, spSliceToStr(route))
 		}
 	}
 

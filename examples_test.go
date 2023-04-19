@@ -21,11 +21,11 @@ func ExampleBuildPrefixesOnly() {
 }
 
 func ExampleTrie_String() {
-	example := &T{Prefix: []byte{0xF0, 0x9F, 0x91}, Value: "short", Children: &[256]*T{
-		0x10: {Prefix: []byte{0x10}, Value: "modified"},
-		0xA8: {Prefix: []byte{0xA8}, Value: "nokey", Children: &[256]*T{
-			0xE2: {Prefix: []byte{0xE2, 0x80, 0x8D}, Value: "withsep", Children: &[256]*T{
-				0xF0: {Prefix: []byte{0xF0, 0x9F, 0x94, 0xA7}, Value: "withkey"},
+	example := &T{Prefix: []byte{0xF0, 0x9F, 0x91}, Value: sp("short"), Children: &[256]*T{
+		0x10: {Prefix: []byte{0x10}, Value: sp("modified")},
+		0xA8: {Prefix: []byte{0xA8}, Value: sp("nokey"), Children: &[256]*T{
+			0xE2: {Prefix: []byte{0xE2, 0x80, 0x8D}, Value: sp("withsep"), Children: &[256]*T{
+				0xF0: {Prefix: []byte{0xF0, 0x9F, 0x94, 0xA7}, Value: sp("withkey")},
 			}},
 		}},
 	}}
@@ -39,16 +39,16 @@ func ExampleTrie_String() {
 }
 
 func ExampleTrie_Iterate() {
-	example := &T{Prefix: []byte{0xF0, 0x9F, 0x91}, Value: "short", Children: &[256]*T{
-		0x10: {Prefix: []byte{0x10}, Value: "modified"},
-		0xA8: {Prefix: []byte{0xA8}, Value: "nokey", Children: &[256]*T{
-			0xE2: {Prefix: []byte{0xE2, 0x80, 0x8D}, Value: "withsep", Children: &[256]*T{
-				0xF0: {Prefix: []byte{0xF0, 0x9F, 0x94, 0xA7}, Value: "withkey"},
+	example := &T{Prefix: []byte{0xF0, 0x9F, 0x91}, Value: sp("short"), Children: &[256]*T{
+		0x10: {Prefix: []byte{0x10}, Value: sp("modified")},
+		0xA8: {Prefix: []byte{0xA8}, Value: sp("nokey"), Children: &[256]*T{
+			0xE2: {Prefix: []byte{0xE2, 0x80, 0x8D}, Value: sp("withsep"), Children: &[256]*T{
+				0xF0: {Prefix: []byte{0xF0, 0x9F, 0x94, 0xA7}, Value: sp("withkey")},
 			}},
 		}},
 	}}
-	example.Iterate(func(prefix []byte, value interface{}) {
-		fmt.Printf("[%v] %+v\n", prefix, value)
+	example.Iterate(func(prefix []byte, value *string) {
+		fmt.Printf("[%v] %+v\n", prefix, *value)
 	})
 	// Output:
 	// [[240 159 145]] short
@@ -59,7 +59,7 @@ func ExampleTrie_Iterate() {
 }
 
 func ExampleTrie_SearchPrefixInString() {
-	tr := BuildFromMap(map[string]interface{}{
+	tr := BuildFromMap(map[string]func(s string) string{
 		"lower": func(s string) string { return strings.ToLower(s) },
 		"upper": func(s string) string { return strings.ToUpper(s) },
 		"snake": func(s string) string {
@@ -99,7 +99,7 @@ func ExampleTrie_SearchPrefixInString() {
 	}
 	for _, inp := range inputs {
 		if raw, prefixLen, ok := tr.SearchPrefixInString(inp); ok {
-			format := raw.(func(string) string)
+			format := *raw
 			fmt.Println(format(inp[prefixLen:]))
 		} else {
 			fmt.Printf("no prefix found in \"%s\"\n", inp)

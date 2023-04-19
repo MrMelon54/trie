@@ -12,16 +12,16 @@ const (
 	formatAsStrings prefixFormat = 1
 )
 
-func (t Trie) String() string {
+func (t Trie[T]) String() string {
 	return strings.Join(t.toStrings(formatAsBytes), "\n")
 }
 
-func (t Trie) toStrings(format prefixFormat) []string {
+func (t Trie[T]) toStrings(format prefixFormat) []string {
 	var resStrings []string
 	if format == formatAsStrings {
-		resStrings = append(resStrings, fmt.Sprintf("[%s] %v", string(t.Prefix), t.Value))
+		resStrings = append(resStrings, fmt.Sprintf("[%s] %v", string(t.Prefix), *t.Value))
 	} else {
-		resStrings = append(resStrings, fmt.Sprintf("[%s] %v", bytesToString(t.Prefix), t.Value))
+		resStrings = append(resStrings, fmt.Sprintf("[%s] %v", bytesToString(t.Prefix), *t.Value))
 	}
 
 	if t.Children != nil {
