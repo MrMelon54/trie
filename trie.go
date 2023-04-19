@@ -342,6 +342,49 @@ func (t *Trie[T]) getAllKeys(prefix string, mask []byte) []string {
 	}
 }
 
+// GetAllKeyValues returns all key-value pairs whose prefixes are subsets of mask
+//    tr := {"": v0, "/user/": v1, "/user/list": v2, "/group/": v3}
+//
+//    tr.GetAllKeyValues("/user/list", false)
+//    -> [{"", v0}, {"/user/", v1}, {"/user/list", v2}]
+func (t *Trie[T]) GetAllKeyValues(mask []byte) []struct {
+	Key   string
+	Value T
+} {
+	return t.getAllKeyValues("", mask)
+}
+
+func (t *Trie[T]) getAllKeyValues(prefix string, mask []byte) []struct {
+	Key   string
+	Value T
+} {
+	var ind = 0
+	for ind < len(mask) && ind < len(t.Prefix) && mask[ind] == t.Prefix[ind] {
+		ind++
+	}
+	if ind == len(t.Prefix) {
+		var res = make([]struct {
+			Key   string
+			Value T
+		}, 0, 1)
+		if t.Value != nil {
+			res = append(res, struct {
+				Key   string
+				Value T
+			}{Key: prefix + string(mask[:ind]), Value: *t.Value})
+		}
+
+		if ind < len(mask) && t.Children != nil && t.Children[mask[ind]] != nil {
+			return append(res, t.Children[mask[ind]].getAllKeyValues(prefix+string(mask[:ind]), mask[ind:])...)
+		}
+
+		return res
+	} else {
+		// doesn't match current prefix
+		return nil
+	}
+}
+
 // Count returns amount of values (non nil) stored in all nodes of trie.
 func (t *Trie[T]) Count() int {
 	if t == nil {

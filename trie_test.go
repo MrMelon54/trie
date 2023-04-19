@@ -208,6 +208,33 @@ func TestTrie_GetAllKeys(t *testing.T) {
 	}
 }
 
+func TestTrie_GetAllKeyValues(t *testing.T) {
+	tr := BuildFromMap(map[string]string{
+		"":                "root",
+		"/api/user":       "user",
+		"/api/user/list":  "list",
+		"/api/group/":     "group",
+		"/api/group/list": "list",
+	})
+
+	var inputs = map[string][]struct {
+		Key   string
+		Value string
+	}{
+		"/api/user/list": {{"", "root"}, {"/api/user", "user"}, {"/api/user/list", "list"}},
+		"/api/test":      {{"", "root"}},
+		"/api/user/li":   {{"", "root"}, {"/api/user", "user"}},
+	}
+
+	for key, expected := range inputs {
+		res := tr.GetAllKeyValues([]byte(key))
+
+		if !reflect.DeepEqual(res, expected) {
+			t.Errorf("%s: got %v, expected %v", key, res, expected)
+		}
+	}
+}
+
 func TestTrie_SubTrie(t *testing.T) {
 	tr := BuildPrefixesOnly(
 		"",
